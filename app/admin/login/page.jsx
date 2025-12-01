@@ -1,83 +1,106 @@
-"use client";
-
+'use client';
 
 import { useState } from 'react';
-// Custom hook replacement for next/navigation's useRouter to ensure compatibility.
-// It uses standard window location for redirection.
-const useSimpleRouter = () => {
-    return {
-        push: (path) => {
-            window.location.href = path;
-        }
-    };
-};
+
+const useSimpleRouter = () => ({
+  push: (path) => { window.location.href = path; }
+});
 
 export default function AdminLogin() {
-  const [secret, setSecret] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [msg, setMsg] = useState('');
-  const router = useSimpleRouter(); 
+  const [loading, setLoading] = useState(false);
+  const router = useSimpleRouter();
 
-  function submit(e) {
+  async function submit(e) {
     e.preventDefault();
+    setMsg('');
+    setLoading(true);
 
-    // Read admin secret ONLY from environment variable. 
-    // The hardcoded fallback has been removed for security.
-    const real = process.env.NEXT_PUBLIC_ADMIN_SECRET;
-    
-    // Check if the environment variable is actually set
-    if (!real) {
-        setMsg('Error: Admin secret environment variable not configured.');
-        setSecret('');
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // important to receive httpOnly cookie
+        body: JSON.stringify({ email, password }),
+      });
+
+      const json = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        setMsg(json.error || 'Login failed');
+        setLoading(false);
         return;
-    }
-    
-    // Check secret
-    if (secret === real) {
-      // Store admin session state
-      localStorage.setItem('admin', 'true');
-      localStorage.setItem('adminSecret', real);
+      }
 
-      // Redirect to the dashboard
+      // server returned user object (cookie contains token)
+      const user = json.user;
+      if (!user) {
+        setMsg('Login failed: no user returned.');
+        setLoading(false);
+        return;
+      }
+
+      if (user.role !== 'admin') {
+        // if user is not admin, logout the session (clear cookie)
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/logout`, {
+          method: 'POST',
+          credentials: 'include',
+        });
+        setMsg('Access denied: admin account required.');
+        setLoading(false);
+        return;
+      }
+
+      // success: redirect to admin dashboard
       router.push('/admin/dashboard');
-    } else {
-      setMsg('Invalid admin secret');
-      setSecret(''); // Clear the secret on failure
+    } catch (err) {
+      console.error('admin login error', err);
+      setMsg('Network error');
+      setLoading(false);
     }
   }
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-        <div className='w-full max-w-md bg-white p-8 rounded-xl shadow-2xl border border-gray-200'>
-            <h1 className='text-3xl font-extrabold text-gray-900 mb-6 text-center'>
-                🔒 Admin Portal Login
-            </h1>
+      <div className='w-full max-w-md bg-white p-8 rounded-xl shadow-2xl border border-gray-200'>
+        <h1 className='text-3xl font-extrabold text-gray-900 mb-6 text-center'>🔒 Admin Portal Login</h1>
 
-            <form onSubmit={submit} className='space-y-4'>
-                <input
-                    type="password"
-                    value={secret}
-                    onChange={e => setSecret(e.target.value)}
-                    placeholder='Enter Admin Secret'
-                    className='w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition shadow-sm text-lg'
-                    required
-                />
+        <form onSubmit={submit} className='space-y-4'>
+          <input
+            type="email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            placeholder='Admin email'
+            className='w-full p-3 border border-gray-300 rounded-lg'
+            required
+          />
 
-                <button 
-                    type="submit"
-                    className='bg-blue-600 hover:bg-blue-700 active:bg-blue-800 transition duration-300 p-3 text-white rounded-lg w-full font-semibold text-lg shadow-md hover:shadow-lg'
-                >
-                    Login
-                </button>
+          <input
+            type="password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            placeholder='Password'
+            className='w-full p-3 border border-gray-300 rounded-lg'
+            required
+          />
 
-                {msg && (
-                    <p className='text-red-600 bg-red-50 p-3 rounded-lg text-center font-medium mt-4'>
-                        {msg}
-                    </p>
-                )}
-                
-                {/* The test secret hint has been removed */}
-            </form>
-        </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className='bg-blue-600 hover:bg-blue-700 p-3 text-white rounded-lg w-full font-semibold'
+          >
+            {loading ? 'Signing in…' : 'Sign in'}
+          </button>
+
+          {msg && (
+            <p className='text-red-600 bg-red-50 p-3 rounded-lg text-center font-medium mt-4'>
+              {msg}
+            </p>
+          )}
+        </form>
+      </div>
     </div>
   );
 }

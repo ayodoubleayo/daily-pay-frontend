@@ -1,4 +1,3 @@
-// File: app/admin/active-sellers/page.jsx
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
@@ -18,18 +17,12 @@ export default function ActiveSellersPage() {
     setLoading(true);
 
     try {
-      const secret = localStorage.getItem('adminSecret');
-      if (!secret) {
-        showMessage('Admin Secret not found. Please log in.', true);
-        setSellers([]);
-        return;
-      }
-
       const res = await fetch(`${API_BASE}/api/admin/active-sellers`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-secret': secret,
+        method: 'GET',
+        headers: { 
+          'Content-Type': 'application/json'  // ✅ REQUIRED BY YOUR RULE
         },
+        credentials: 'include',               // ✅ ALLOWS BACKEND TO READ COOKIE
       });
 
       if (!res.ok) {
