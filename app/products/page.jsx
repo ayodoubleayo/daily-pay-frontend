@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import ProductCard from "../../components/ProductCard";
 
 // Function to fetch product data from your API
@@ -73,7 +75,7 @@ export default async function ProductsPage() {
           {/* OPTIONAL: Uncomment the lines below to see how the skeleton loader looks */}
           {/* Array.from({ length: 4 }).map((_, i) => <ProductSkeleton key={`skeleton-${i}`} />) */}
 
-        </div>
+ </div>
       )}
     </div>
   );

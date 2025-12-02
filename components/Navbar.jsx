@@ -86,6 +86,16 @@ export default function Navbar() {
           <Link href="/">Home</Link>
           <Link href="/categories">Categories</Link>
           <Link href="/products">Products</Link>
+             {/* CART */}
+          <Link href={user ? "/cart" : "/login"} className="relative">
+            Cart
+            {/* render count only after mount to avoid hydration mismatch */}
+            {mounted && cart && cart.length > 0 && (
+              <span className="ml-1 px-2 py-0.5 text-xs bg-blue-700 text-white rounded-full">
+                {cart.length}
+              </span>
+            )}
+          </Link>
           <Link href="/about">About</Link>
           <Link href="/suggestions">Suggestion</Link>
           <Link href="/complaints">Complaint</Link>
@@ -158,16 +168,7 @@ export default function Navbar() {
             </div>
           )}
 
-          {/* CART */}
-          <Link href={user ? "/cart" : "/login"} className="relative">
-            Cart
-            {/* render count only after mount to avoid hydration mismatch */}
-            {mounted && cart && cart.length > 0 && (
-              <span className="ml-1 px-2 py-0.5 text-xs bg-blue-700 text-white rounded-full">
-                {cart.length}
-              </span>
-            )}
-          </Link>
+       
         </div>
       </div>
     </nav>

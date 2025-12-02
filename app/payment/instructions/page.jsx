@@ -1,4 +1,4 @@
-// frontend/app/payment/instructions/page.jsx
+"use client";
 import { useEffect, useState } from "react";
 
 export default function PaymentInstructions() {

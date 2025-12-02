@@ -1,10 +1,9 @@
-// app/admin/layout.jsx
-import AdminWrapper from "./wrapper";
+import ClientLayout from "./ClientLayout";
 
 export const metadata = {
   title: "Admin Panel",
 };
 
 export default function AdminLayout({ children }) {
-  return <AdminWrapper>{children}</AdminWrapper>;
+  return <ClientLayout>{children}</ClientLayout>;
 }

@@ -1,7 +1,6 @@
-// frontend/app/user/transaction-history/page.jsx
 "use client";
 import { useEffect, useState } from "react";
-import TransactionCard from "../../../components/TransactionCard";
+import TransactionCard from "../../../components/admin/TransactionCard";
 
 export default function UserHistoryPage() {
   const [txs, setTxs] = useState([]);

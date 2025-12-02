@@ -1,8 +1,7 @@
-// File: app/seller/transaction-history/page.jsx
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import TransactionCard from "../../../components/TransactionCard";
+import TransactionCard from "../../../components/admin/TransactionCard";
 import StatusMessage from "@/components/StatusMessage";
 import useMessage from "@/components/useMessage";
 
