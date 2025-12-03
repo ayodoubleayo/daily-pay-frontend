@@ -1,4 +1,3 @@
-// frontend/components/ProductCard.jsx
 "use client";
 import Link from "next/link";
 import AddToCartButton from "./AddToCartButton";
@@ -6,6 +5,9 @@ import useUserLocation from "../hooks/useUserLocation";
 import { calcDistance } from "../lib/calcDistance";
 
 export default function ProductCard({ product }) {
+  // Safe console log (INSIDE component)
+  console.log("ProductCard product:", product);
+
   const userLocation = useUserLocation();
   let distanceText = null;
 
@@ -16,7 +18,9 @@ export default function ProductCard({ product }) {
       product.location.lat,
       product.location.lng
     );
+
     const minutes = Math.max(1, Math.round((km / 40) * 60)); // naive estimate
+
     distanceText = `${km.toFixed(1)} km • ${minutes} mins away`;
   }
 
@@ -30,34 +34,34 @@ export default function ProductCard({ product }) {
         />
       </Link>
 
-      {/* Small seller badge under image (Option B) */}
-    {product.seller && (
-  <div className="mb-3 flex items-center gap-3">
-    <img
-      src={product.seller.shopLogo || "/placeholder.png"}
-      alt={product.seller.shopName || product.seller.name || "Seller"}
-      className="w-8 h-8 rounded-full object-cover border"
-    />
-    <div className="text-sm">
-      <div className="font-semibold leading-tight">
-        {product.seller.shopName || product.seller.name}
-      </div>
-      <div className="text-xs text-gray-500">Seller Market</div>
+      {/* Small seller badge */}
+      {product.seller && (
+        <div className="mb-3 flex items-center gap-3">
+          <img
+            src={product.seller.shopLogo || "/placeholder.png"}
+            alt={product.seller.shopName || product.seller.name || "Seller"}
+            className="w-8 h-8 rounded-full object-cover border"
+          />
+          <div className="text-sm">
+            <div className="font-semibold leading-tight">
+              {product.seller.shopName || product.seller.name}
+            </div>
+            <div className="text-xs text-gray-500">Seller Market</div>
 
-      {/* ⭐ NEW — ADDRESS */}
-      {product.seller.address && (
-        <div className="text-xs text-gray-600">
-          {product.seller.address}
+            {product.seller.address && (
+              <div className="text-xs text-gray-600">
+                {product.seller.address}
+              </div>
+            )}
+          </div>
         </div>
       )}
-    </div>
-  </div>
-)}
-
 
       <h2 className="text-lg font-semibold mb-1">{product.name}</h2>
 
-      {distanceText && <p className="text-sm text-gray-600 mb-2">{distanceText}</p>}
+      {distanceText && (
+        <p className="text-sm text-gray-600 mb-2">{distanceText}</p>
+      )}
 
       <p className="text-blue-600 font-bold mb-3">
         ₦{Number(product.price).toLocaleString()}
