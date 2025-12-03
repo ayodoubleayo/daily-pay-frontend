@@ -1,5 +1,6 @@
 'use client';
 import { useState } from "react";
+import { fetchJson } from "@/lib/api";   // ✅ use your global API system
 
 export default function ComplaintsPage() {
   const [text, setText] = useState("");
@@ -9,17 +10,18 @@ export default function ComplaintsPage() {
     e.preventDefault();
     setMsg("Submitting...");
 
-    const res = await fetch("http://localhost:5000/api/complaints", {   // <= FIX
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text }),
-    });
+    try {
+      const data = await fetchJson("/api/complaints", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
 
-    const data = await res.json();
-    if (!res.ok) return setMsg(data.error);
-
-    setMsg("Complaint submitted successfully.");
-    setText("");
+      setMsg("Complaint submitted successfully.");
+      setText("");
+    } catch (err) {
+      setMsg(err.message || "Something went wrong.");
+    }
   }
 
   return (
