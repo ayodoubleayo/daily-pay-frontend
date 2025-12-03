@@ -1,8 +1,8 @@
-// app/login/page.jsx
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
+console.log("DEBUG API URL:", process.env.NEXT_PUBLIC_API_URL);
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -14,6 +14,7 @@ export default function LoginPage() {
   async function handleLogin(e) {
     e.preventDefault();
     setMessage("Loading...");
+
     try {
       const res = await fetch(process.env.NEXT_PUBLIC_API_URL + "/api/auth/login", {
         method: "POST",
@@ -24,13 +25,22 @@ export default function LoginPage() {
       const data = await res.json();
       if (!res.ok) return setMessage(data.error || "Invalid login");
 
-      login(data.token);
+      // 1️⃣ Save token correctly
+      localStorage.setItem("token", data.token);
+
+      // 2️⃣ Save user
       localStorage.setItem("user", JSON.stringify(data.user));
+
+      // 3️⃣ keep your existing context login
+      login(data.token);
+
+      // 4️⃣ store admin flag (unchanged)
       if (data.user.role === "admin") {
         localStorage.setItem("isAdminUser", "true");
       } else {
         localStorage.removeItem("isAdminUser");
       }
+      
 
       setMessage("Login successful!");
       router.push("/");
@@ -51,7 +61,6 @@ export default function LoginPage() {
         <input className="border p-2 rounded" placeholder="Password" type="password"
           value={password} onChange={(e) => setPassword(e.target.value)} />
 
-        {/* Forgot Password link (Option C includes this) */}
         <p
           className="text-sm text-blue-600 hover:underline cursor-pointer"
           onClick={() => router.push('/forgot-password')}

@@ -1,6 +1,5 @@
 "use client";
-import { useState } from "react";
-import { useContext } from "react";
+import { useState, useContext } from "react";
 import { useRouter } from "next/navigation";
 import { CartContext } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
@@ -12,12 +11,9 @@ export default function AddToCartButton({ product }) {
   const router = useRouter();
 
   async function handleAdd() {
-    // If not logged in, prompt to login/register
     if (!token) {
       const go = confirm("You must be signed in to add items to cart. Go to login?");
-      if (go) {
-        router.push("/login");
-      }
+      if (go) router.push("/login");
       return;
     }
 
@@ -28,11 +24,11 @@ export default function AddToCartButton({ product }) {
         _id: product._id || product.id,
       });
 
-      // little toast
       const el = document.createElement("div");
       el.textContent = "Added to cart";
       el.style =
-        "position:fixed;right:20px;bottom:20px;background:#111;color:#fff;padding:8px 12px;border-radius:6px;z-index:9999";
+        "position:fixed;right:20px;bottom:20px;background:#111;color:#fff;" +
+        "padding:8px 12px;border-radius:6px;z-index:9999";
       document.body.appendChild(el);
       setTimeout(() => el.remove(), 1200);
     } catch (e) {
