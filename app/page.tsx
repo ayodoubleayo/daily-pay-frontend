@@ -23,12 +23,12 @@ export default async function Home() {
       {/* MAIN TITLE */}
       <h1 className="text-4xl font-bold mb-6 text-center
 ">
-        $DAILY-PAID
+        DAILY-PAY
       </h1>
 
       {/* FULL DESCRIPTION */}
       <p className="mb-10 text-lg max-w-3xl mx-auto leading-relaxed">
-        Welcome to $DAILY-PAY  — your all-in-one marketplace for quality products
+        Welcome to DAILY-PAY  — your all-in-one marketplace for quality products
         and trusted services. Whether you're shopping for top items, hiring skilled
         professionals, or offering your own services, we connect buyers, sellers,
         and service providers in a safe and reliable environment. Explore everything

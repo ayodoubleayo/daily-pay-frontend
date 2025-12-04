@@ -4,10 +4,14 @@ import React from "react";
 
 // Fetch product by ID
 async function getProduct(id) {
+    console.log("SERVER  FETCHING PRODUCT WITH ID:", id);
+
     const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/products/${id}`,
         { cache: "no-store" }
     );
+
+    console.log("SERVER  RESPONSE STATUS:", res.status);
 
     if (!res.ok) return null;
     return res.json();
@@ -58,11 +62,18 @@ const SellerBadge = ({ seller }) => (
     </div>
 );
 
-// ✅ FINAL — Only ONE export default allowed
-export default async function ProductPage({ params }) {
-    const id = params.id;
+// ✅ FIXED VERSION — Next.js 15+ requires awaiting params
+export default async function ProductPage(props) {
+    const params = await props.params;
 
+    console.log("PAGE PARAMS:", params);
+    console.log("PRODUCT ID:", params.id);
+
+    const id = params.id;
     const product = await getProduct(id);
+
+    console.log("FINAL PRODUCT:", product);
+
     if (!product) return notFound();
 
     const stockStatus =

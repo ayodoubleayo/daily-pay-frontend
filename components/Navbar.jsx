@@ -5,7 +5,6 @@ import { useContext, useEffect, useState } from "react";
 import { CartContext } from "../context/CartContext";
 
 export default function Navbar() {
-  // avoid reading cart length in SSR by waiting until mounted
   const { cart } = useContext(CartContext);
   const [mounted, setMounted] = useState(false);
 
@@ -16,13 +15,16 @@ export default function Navbar() {
   const [isAdminUser, setIsAdminUser] = useState(false);
 
   useEffect(() => {
-    // only run on client
     setMounted(true);
 
-    // localStorage reads inside useEffect (no SSR)
     try {
-      const data = typeof window !== "undefined" ? localStorage.getItem("user") : null;
-      const adminFlag = typeof window !== "undefined" ? localStorage.getItem("isAdminUser") : null;
+      const data =
+        typeof window !== "undefined" ? localStorage.getItem("user") : null;
+      const adminFlag =
+        typeof window !== "undefined"
+          ? localStorage.getItem("isAdminUser")
+          : null;
+
       if (data) setUser(JSON.parse(data));
       if (adminFlag === "true") setIsAdminUser(true);
     } catch (e) {
@@ -37,18 +39,29 @@ export default function Navbar() {
     }
   }
 
+  // 🔥 AUTO-CLOSE MENU & DROPDOWNS ON LINK CLICK
+  function closeMenu() {
+    setMenuOpen(false);
+    setUserDropdown(false);
+    setSellerDropdown(false);
+  }
+
   return (
     <nav className="bg-white shadow-sm sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-5 py-4 flex items-center justify-between">
         <Link
           href="/"
+          onClick={closeMenu}
           className="whitespace-nowrap text-2xl font-bold bg-gradient-to-r from-blue-500 to-blue-700 bg-clip-text text-transparent mr-10 md:mr-20"
         >
           $DAILY-PAY
         </Link>
 
         {/* MOBILE HAMBURGER */}
-        <button className="md:hidden text-3xl" onClick={() => setMenuOpen(!menuOpen)}>
+        <button
+          className="md:hidden text-3xl"
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
           ☰
         </button>
 
@@ -59,7 +72,11 @@ export default function Navbar() {
             absolute md:static bg-white left-0 right-0 
             top-16 md:top-auto p-5 md:p-0
             transition-all duration-300 shadow-md md:shadow-none
-            ${menuOpen ? "opacity-100 visible" : "opacity-0 invisible md:opacity-100 md:visible"}
+            ${
+              menuOpen
+                ? "opacity-100 visible"
+                : "opacity-0 invisible md:opacity-100 md:visible"
+            }
           `}
         >
           {/* SEARCH BAR */}
@@ -67,7 +84,9 @@ export default function Navbar() {
             onSubmit={(e) => {
               e.preventDefault();
               const q = e.target.searchInput.value.trim();
-              if (q.length > 0) window.location.href = `/search?q=${encodeURIComponent(q)}`;
+              if (q.length > 0)
+                window.location.href = `/search?q=${encodeURIComponent(q)}`;
+              closeMenu();
             }}
             className="flex items-center bg-gray-100 px-3 py-1 rounded-full w-full md:w-auto"
           >
@@ -83,22 +102,43 @@ export default function Navbar() {
           </form>
 
           {/* STATIC LINKS */}
-          <Link href="/">Home</Link>
-          <Link href="/categories">Categories</Link>
-          <Link href="/products">Products</Link>
-             {/* CART */}
-          <Link href={user ? "/cart" : "/login"} className="relative">
+          <Link href="/" onClick={closeMenu}>
+            Home
+          </Link>
+
+          <Link href="/categories" onClick={closeMenu}>
+            Categories
+          </Link>
+
+          <Link href="/products" onClick={closeMenu}>
+            Products
+          </Link>
+
+          {/* CART */}
+          <Link
+            href={user ? "/cart" : "/login"}
+            className="relative"
+            onClick={closeMenu}
+          >
             Cart
-            {/* render count only after mount to avoid hydration mismatch */}
             {mounted && cart && cart.length > 0 && (
               <span className="ml-1 px-2 py-0.5 text-xs bg-blue-700 text-white rounded-full">
                 {cart.length}
               </span>
             )}
           </Link>
-          <Link href="/about">About</Link>
-          <Link href="/suggestions">Suggestion</Link>
-          <Link href="/complaints">Complaint</Link>
+
+          <Link href="/about" onClick={closeMenu}>
+            About
+          </Link>
+
+          <Link href="/suggestions" onClick={closeMenu}>
+            Suggestion
+          </Link>
+
+          <Link href="/complaints" onClick={closeMenu}>
+            Complaint
+          </Link>
 
           {/* IF NOT LOGGED IN */}
           {!user && (
@@ -117,8 +157,12 @@ export default function Navbar() {
 
                 {userDropdown && (
                   <div className="absolute bg-white shadow-md p-3 rounded w-40 flex flex-col gap-2 z-50">
-                    <Link href="/register">User Register</Link>
-                    <Link href="/login">User Login</Link>
+                    <Link href="/register" onClick={closeMenu}>
+                      User Register
+                    </Link>
+                    <Link href="/login" onClick={closeMenu}>
+                      User Login
+                    </Link>
                   </div>
                 )}
               </div>
@@ -137,8 +181,12 @@ export default function Navbar() {
 
                 {sellerDropdown && (
                   <div className="absolute bg-white shadow-md p-3 rounded w-40 flex flex-col gap-2 z-50">
-                    <Link href="/seller/register">Seller Register</Link>
-                    <Link href="/seller/login">Seller Login</Link>
+                    <Link href="/seller/register" onClick={closeMenu}>
+                      Seller Register
+                    </Link>
+                    <Link href="/seller/login" onClick={closeMenu}>
+                      Seller Login
+                    </Link>
                   </div>
                 )}
               </div>
@@ -150,14 +198,20 @@ export default function Navbar() {
             <div className="flex flex-col md:flex-row gap-4 md:gap-5">
               <span className="font-semibold">Hi, {user.name}</span>
 
-              <Link href="/account">My Account</Link>
+              <Link href="/account" onClick={closeMenu}>
+                My Account
+              </Link>
 
-              <Link href="/user/history" className="text-blue-600">
+              <Link href="/user/history" className="text-blue-600" onClick={closeMenu}>
                 My History
               </Link>
 
               {isAdminUser && (
-                <Link href="/admin/dashboard" className="text-red-600 font-bold">
+                <Link
+                  href="/admin/dashboard"
+                  onClick={closeMenu}
+                  className="text-red-600 font-bold"
+                >
                   Admin Panel
                 </Link>
               )}
@@ -167,8 +221,6 @@ export default function Navbar() {
               </button>
             </div>
           )}
-
-       
         </div>
       </div>
     </nav>
