@@ -8,11 +8,8 @@ export default function CheckoutPage() {
   const [ready, setReady] = useState(false);
   const [form, setForm] = useState({ name: "", address: "", city: "", phone: "" });
   const [loading, setLoading] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [paymentProof, setPaymentProof] = useState("");
-  const [shippingMethod, setShippingMethod] = useState("pickup");
   const [fees, setFees] = useState({ pickupFee: 0, deliveryFee: 0 });
-  const [estimatedMinutes, setEstimatedMinutes] = useState(0);
+  const [shippingMethod, setShippingMethod] = useState("pickup");
 
   const router = useRouter();
   const { cart, clearCart } = useContext(CartContext);
@@ -20,14 +17,13 @@ export default function CheckoutPage() {
   const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
 
-  useEffect(() => {
-    setReady(true);
-  }, []);
+  useEffect(() => setReady(true), []);
 
   useEffect(() => {
     if (!ready) return;
-    const tk = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-    const usr = typeof window !== "undefined" ? localStorage.getItem("user") : null;
+
+    const tk = localStorage.getItem("token");
+    const usr = localStorage.getItem("user");
 
     if (!tk || !usr) {
       alert("Please login to continue checkout");
@@ -55,7 +51,9 @@ export default function CheckoutPage() {
         pickupFee: Number(data.pickupFee ?? 0),
         deliveryFee: Number(data.deliveryFee ?? 0),
       });
-    } catch {}
+    } catch (e) {
+      console.warn("fetchFees error", e);
+    }
   }
 
   const subtotal = cart.reduce((s, it) => s + Number(it.price || 0) * (it.qty || 1), 0);
@@ -91,12 +89,7 @@ export default function CheckoutPage() {
       const shipping = {
         method: shippingMethod,
         fee: chosenFee,
-        details: {
-          name: form.name,
-          phone: form.phone,
-          address: form.address,
-          city: form.city,
-        },
+        details: { ...form },
       };
 
       const body = {
@@ -106,7 +99,6 @@ export default function CheckoutPage() {
         items,
         meta: { shipping },
         paymentMock: true,
-        paymentProof,
         total,
       };
 
@@ -120,12 +112,29 @@ export default function CheckoutPage() {
       });
 
       const data = await res.json();
-
       if (!res.ok) throw new Error(data.error || "Order failed");
 
-      clearCart();
+      // Extract both order ID and transaction ID (backend returns { order, transaction })
+      const orderId = data?.order?._id || data?.order?._id;
+      const txId = data?.transaction?._id || data?.transaction?._id;
 
-      router.push(`/checkout/transfer?amount=${total}`);
+      if (!orderId) {
+        alert("Order created but no valid order ID was returned.");
+        return;
+      }
+
+      // Prefer txId (transaction id) — if it's present use it; otherwise we'll still pass order
+      const query = new URLSearchParams();
+      query.set("order", orderId);
+      if (txId) query.set("tx", txId);
+      query.set("amount", String(total));
+      if (sellerId) query.set("seller", sellerId);
+
+      // redirect to transfer page with both ids when available
+      router.push(`/checkout/transfer?${query.toString()}`);
+
+      // clear cart locally (we already created records on server)
+      clearCart();
     } catch (err) {
       alert(err.message || "Checkout failed");
     } finally {
@@ -165,12 +174,12 @@ export default function CheckoutPage() {
             <label className="block text-sm mb-2">Shipping Method</label>
 
             <label className="flex items-center gap-2">
-              <input type="radio" value="pickup" checked={shippingMethod === "pickup"} onChange={() => setShippingMethod("pickup")} />
+              <input type="radio" checked={shippingMethod === "pickup"} onChange={() => setShippingMethod("pickup")} />
               <span>Pickup (₦{fees.pickupFee.toLocaleString()})</span>
             </label>
 
             <label className="flex items-center gap-2 mt-1">
-              <input type="radio" value="delivery" checked={shippingMethod === "delivery"} onChange={() => setShippingMethod("delivery")} />
+              <input type="radio" checked={shippingMethod === "delivery"} onChange={() => setShippingMethod("delivery")} />
               <span>Delivery (₦{fees.deliveryFee.toLocaleString()})</span>
             </label>
           </div>
