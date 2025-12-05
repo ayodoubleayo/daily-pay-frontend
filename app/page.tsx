@@ -2,63 +2,64 @@
 import Categories from "../components/Categories";
 
 export default async function Home() {
-  // server fetch categories
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/categories`, { cache: "no-store" });
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/categories`,
+    { cache: "no-store" }
+  );
   const categories = res.ok ? await res.json() : [];
 
   return (
-<div
-  className="mt-5 max-w-6xl mx-auto text-white p-5 rounded-xl"
-  style={{
-    backgroundImage: "url('/bg.jpg')",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    backgroundRepeat: "no-repeat",
-    minHeight: "500px",
-    opacity: "0.95"
-
-  }}
->
-
+    <div
+      className="
+        mt-5 max-w-4xl mx-auto text-white p-5 rounded-xl
+        lg:p-10
+      "
+      style={{
+        backgroundImage: "url('/bg.jpg')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        minHeight: "400px",
+        opacity: "0.95",
+      }}
+    >
       {/* MAIN TITLE */}
-      <h1 className="text-4xl font-bold mb-6 text-center
-">
-        DAILY-PAY
+      <h1 className="
+        text-3xl font-bold mb-4 text-center
+        sm:text-4xl
+      ">
+        DAILY-PAY MARKETPLACE
       </h1>
 
-      {/* FULL DESCRIPTION */}
-      <p className="mb-10 text-lg max-w-3xl mx-auto leading-relaxed">
-        Welcome to DAILY-PAY  — your all-in-one marketplace for quality products
-        and trusted services. Whether you're shopping for top items, hiring skilled
-        professionals, or offering your own services, we connect buyers, sellers,
-        and service providers in a safe and reliable environment. Explore everything
-        you need with confidence.
+      {/* DESCRIPTION */}
+      <p className="mb-6 text-base sm:text-lg leading-relaxed text-center">
+        Welcome to DAILY-PAY — your all-in-one marketplace for quality products
+        and trusted services. Shop items, hire professionals, or offer your
+        skills in a safe and reliable environment.
       </p>
 
-      {/* SECOND INTRO LINE */}
-      <p className="mb-16 text-lg">
+      <p className="mb-6 text-base sm:text-lg text-center">
         Your perfect shopping & hiring experience begins here.
-
-      </p>
-      
-      {/* SHORT INTRO */}
-      <p className="mb-6 text-lg">
-        Browse categories and discover amazing products & services near you.
       </p>
 
+      <p className="mb-8 text-sm sm:text-base text-center">
+        Browse categories and discover products & services near you.
+      </p>
 
-      
-
-      {/* BUTTON SECTION */}
-      <section className="mt-50">
-   
+      {/* BUTTON */}
+      <div className="flex justify-center">
         <a
           href="/products"
-          className="px-6 py-3 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition"
+          className="
+            px-5 py-2.5 sm:px-6 sm:py-3
+            bg-blue-700 text-white font-medium
+            rounded-lg shadow-md
+            hover:bg-blue-800 transition
+          "
         >
           Browse All Products
         </a>
-      </section>
+      </div>
     </div>
   );
 }
